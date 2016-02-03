@@ -1,0 +1,9 @@
+{% extends '@User/layout.html.twig' %}
+
+{% block fos_user_content %}
+    {{ form_start(form) }}
+    {{ form_row(form.name) }}
+    {{ form_row(form.isPrivate) }}
+    {{ form_end(form) }}
+
+{% endblock fos_user_content %}
