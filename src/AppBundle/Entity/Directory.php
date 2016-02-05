@@ -4,11 +4,13 @@ namespace AppBundle\Entity;
 use AppBundle\Repository\DirectoryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use UserBundle\Entity\User;
 
 /**
  * @ORM\Entity(repositoryClass="AppBundle\Repository\DirectoryRepository")
  * @ORM\Table(name="directory")
+ * @UniqueEntity({"name", "directory"})
  * @ORM\HasLifecycleCallbacks()
  */
 class Directory
@@ -205,9 +207,12 @@ class Directory
 
     public function createDir()
     {
-        //var_dump($this->getUploadRootDir($this->getPath()).$this->getName());
-        return mkdir($this->getUploadRootDir($this->getPath()) . $this->getName());
-
+        $path = $this->getUploadRootDir($this->getPath());
+        if (!is_dir($path)) {
+            mkdir($path);
+        } else {
+            echo 'This directory exists';
+        }
     }
 
     protected function getUploadRootDir($path)
@@ -221,7 +226,7 @@ class Directory
     {
         // get rid of the __DIR__ so it doesn't screw up
         // when displaying uploaded doc/image in the view.
-        return 'files/' . $this->getUserName() . '/' . $path;
+        return 'files/' . $this->getUserName() . $path;
     }
 
     /**

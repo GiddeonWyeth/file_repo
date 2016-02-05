@@ -10,13 +10,6 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 class RepoController extends Controller
 {
 
-    /**
-     * @param $encoded_name
-     */
-    private static function getPathAction($encoded_name)
-    {
-
-    }
 
     /**
      * @param $dir_name
@@ -34,15 +27,31 @@ class RepoController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $directory->setUserId($user);
             $directory->setUserName($user->getUsername());
-            $directory->createDir();
             $em = $this->getDoctrine()->getManager();
             if (!empty($dir_name)) {
                 $parent_dir = $em->getRepository('AppBundle:Directory')->findOneBy(['encoded_name' => $dir_name]);
                 $directory->setDirectoryId($parent_dir);
+                $parent_path = $this->getPathAction($parent_dir->getId(), $em->createQueryBuilder())['path'];
+                $directory->setPath($parent_path . '/' . $directory->getName());
             }
             $em->persist($directory);
+            $directory->createDir();
             $em->flush();
+
         }
         return $this->render('UserBundle:Profile:dir_show.html.twig', array('user' => $user, 'form' => $form->createView()));
+    }
+
+    private static function getPathAction($id, $queryBuilder)
+    {
+        $qb = $queryBuilder;
+        $qb->select('d.path')
+            ->from('AppBundle:Directory', 'd')
+            ->where('d.id = ?1')
+            ->setParameter(1, $id);
+
+        $query = $qb->getQuery();
+        return $query->getSingleResult();
+
     }
 }
