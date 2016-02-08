@@ -2,19 +2,31 @@
 namespace AppBundle\Entity;
 
 use AppBundle\Repository\DirectoryRepository;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Knp\DoctrineBehaviors\Model as ORMBehaviors;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use UserBundle\Entity\User;
 
 /**
  * @ORM\Entity(repositoryClass="AppBundle\Repository\DirectoryRepository")
  * @ORM\Table(name="directory")
- * @UniqueEntity({"name", "directory"})
+ * @UniqueEntity("path")
  * @ORM\HasLifecycleCallbacks()
  */
-class Directory
+class Directory implements ORMBehaviors\Tree\NodeInterface, \ArrayAccess
 {
+
+    use ORMBehaviors\Blameable\Blameable,
+        ORMBehaviors\Geocodable\Geocodable,
+        ORMBehaviors\Loggable\Loggable,
+        ORMBehaviors\Sluggable\Sluggable,
+        ORMBehaviors\SoftDeletable\SoftDeletable,
+        ORMBehaviors\Sortable\Sortable,
+        ORMBehaviors\Timestampable\Timestampable,
+        ORMBehaviors\Translatable\Translatable,
+        ORMBehaviors\Tree\Node;
+
+
 
     /**
      * @ORM\Id
@@ -53,20 +65,21 @@ class Directory
      */
     private $path;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Directory", inversedBy="directories")
-     */
-    private $directory;
-
-    /**
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Directory", mappedBy="directory")
-     */
-    private $directories;
+//    /**
+//     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Directory", inversedBy="directories")
+//     */
+//    private $directory;
+//
+//
+//    /**
+//     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Directory", mappedBy="directory")
+//     */
+//    private $directories;
 
 
     public function __construct()
     {
-        $this->directories = new ArrayCollection();
+        // $this->directories = new ArrayCollection();
     }
 
 
@@ -78,6 +91,16 @@ class Directory
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @param $id
+     * @return $this
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+        return $this;
     }
 
     /**
@@ -149,61 +172,61 @@ class Directory
         return $this->user;
     }
 
-    /**
-     * Set directoryId
-     *
-     * @param \AppBundle\Entity\Directory $directoryId
-     *
-     * @return Directory
-     */
-    public function setDirectoryId(\AppBundle\Entity\Directory $directoryId = null)
-    {
-        $this->directory = $directoryId;
-        return $this;
-    }
-
-    /**
-     * Get directoryId
-     *
-     * @return \AppBundle\Entity\Directory
-     */
-    public function getDirectoryId()
-    {
-        return $this->directory;
-    }
-
-    /**
-     * Add directory
-     *
-     * @param \AppBundle\Entity\Directory $directory
-     *
-     * @return Directory
-     */
-    public function addDirectory(\AppBundle\Entity\Directory $directory)
-    {
-        $this->directories[] = $directory;
-        return $this;
-    }
-
-    /**
-     * Remove directory
-     *
-     * @param \AppBundle\Entity\Directory $directory
-     */
-    public function removeDirectory(\AppBundle\Entity\Directory $directory)
-    {
-        $this->directories->removeElement($directory);
-    }
-
-    /**
-     * Get directories
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getDirectories()
-    {
-        return $this->directories;
-    }
+//    /**
+//     * Set directoryId
+//     *
+//     * @param \AppBundle\Entity\Directory $directoryId
+//     *
+//     * @return Directory
+//     */
+//    public function setDirectoryId(\AppBundle\Entity\Directory $directoryId = null)
+//    {
+//        $this->directory = $directoryId;
+//        return $this;
+//    }
+//
+//    /**
+//     * Get directoryId
+//     *
+//     * @return \AppBundle\Entity\Directory
+//     */
+//    public function getDirectoryId()
+//    {
+//        return $this->directory;
+//    }
+//
+//    /**
+//     * Add directory
+//     *
+//     * @param \AppBundle\Entity\Directory $directory
+//     *
+//     * @return Directory
+//     */
+//    public function addDirectory(\AppBundle\Entity\Directory $directory)
+//    {
+//        $this->directories[] = $directory;
+//        return $this;
+//    }
+//
+//    /**
+//     * Remove directory
+//     *
+//     * @param \AppBundle\Entity\Directory $directory
+//     */
+//    public function removeDirectory(\AppBundle\Entity\Directory $directory)
+//    {
+//        $this->directories->removeElement($directory);
+//    }
+//
+//    /**
+//     * Get directories
+//     *
+//     * @return \Doctrine\Common\Collections\Collection
+//     */
+//    public function getDirectories()
+//    {
+//        return $this->directories;
+//    }
 
     public function createDir()
     {
@@ -289,6 +312,10 @@ class Directory
     {
         $this->name = $name;
         return $this;
+    }
+
+    public function getSluggableFields()
+    {
     }
 
 }

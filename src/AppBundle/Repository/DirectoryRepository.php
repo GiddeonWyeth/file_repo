@@ -2,6 +2,7 @@
 namespace AppBundle\Repository;
 
 use Doctrine\ORM\EntityRepository;
+use Knp\DoctrineBehaviors\ORM as ORMBehaviors;
 
 /**
  * DirectoryRepository
@@ -11,5 +12,5 @@ use Doctrine\ORM\EntityRepository;
  */
 class DirectoryRepository extends EntityRepository
 {
-
+    use ORMBehaviors\Tree\Tree;
 }
