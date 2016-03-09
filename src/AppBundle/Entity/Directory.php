@@ -2,6 +2,7 @@
 namespace AppBundle\Entity;
 
 use AppBundle\Repository\DirectoryRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Knp\DoctrineBehaviors\Model as ORMBehaviors;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -13,25 +14,16 @@ use UserBundle\Entity\User;
  * @UniqueEntity("path")
  * @ORM\HasLifecycleCallbacks()
  */
-class Directory implements ORMBehaviors\Tree\NodeInterface, \ArrayAccess
+class Directory /*implements ORMBehaviors\Tree\NodeInterface, \ArrayAccess*/
 {
 
-    use ORMBehaviors\Blameable\Blameable,
-        ORMBehaviors\Geocodable\Geocodable,
-        ORMBehaviors\Loggable\Loggable,
-        ORMBehaviors\Sluggable\Sluggable,
-        ORMBehaviors\SoftDeletable\SoftDeletable,
-        ORMBehaviors\Sortable\Sortable,
-        ORMBehaviors\Timestampable\Timestampable,
-        ORMBehaviors\Translatable\Translatable,
-        ORMBehaviors\Tree\Node;
-
+    //use ORMBehaviors\Tree\Node;
 
 
     /**
      * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer")
+     * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
 
@@ -43,7 +35,7 @@ class Directory implements ORMBehaviors\Tree\NodeInterface, \ArrayAccess
     /**
      * @ORM\Column(type="string")
      */
-    private $encoded_name;
+    private $encodedName;
 
     /**
      * @ORM\ManyToOne(targetEntity="UserBundle\Entity\User", inversedBy="directories")
@@ -51,7 +43,7 @@ class Directory implements ORMBehaviors\Tree\NodeInterface, \ArrayAccess
     private $user;
 
 
-    private $user_name;
+    private $userName;
 
 
     /**
@@ -65,21 +57,27 @@ class Directory implements ORMBehaviors\Tree\NodeInterface, \ArrayAccess
      */
     private $path;
 
-//    /**
-//     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Directory", inversedBy="directories")
-//     */
-//    private $directory;
-//
-//
-//    /**
-//     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Directory", mappedBy="directory")
-//     */
-//    private $directories;
+    /**
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Directory", inversedBy="directories")
+     */
+    private $directory;
+
+
+    /**
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Directory", mappedBy="directory")
+     */
+    private $directories;
+
+    /**
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\File", mappedBy="directory")
+     */
+    private $files;
 
 
     public function __construct()
     {
-        // $this->directories = new ArrayCollection();
+        $this->directories = new ArrayCollection();
+        $this->files = new ArrayCollection();
     }
 
 
@@ -94,23 +92,13 @@ class Directory implements ORMBehaviors\Tree\NodeInterface, \ArrayAccess
     }
 
     /**
-     * @param $id
-     * @return $this
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
-        return $this;
-    }
-
-    /**
      * Get encodedName
      *
      * @return string
      */
     public function getEncodedName()
     {
-        return $this->encoded_name;
+        return $this->encodedName;
     }
 
     /**
@@ -122,7 +110,7 @@ class Directory implements ORMBehaviors\Tree\NodeInterface, \ArrayAccess
      */
     public function setEncodedName()
     {
-        $this->encoded_name = sha1(uniqid(mt_rand(), true));
+        $this->encodedName = sha1(uniqid(mt_rand(), true));
         return $this;
     }
 
@@ -172,61 +160,61 @@ class Directory implements ORMBehaviors\Tree\NodeInterface, \ArrayAccess
         return $this->user;
     }
 
-//    /**
-//     * Set directoryId
-//     *
-//     * @param \AppBundle\Entity\Directory $directoryId
-//     *
-//     * @return Directory
-//     */
-//    public function setDirectoryId(\AppBundle\Entity\Directory $directoryId = null)
-//    {
-//        $this->directory = $directoryId;
-//        return $this;
-//    }
-//
-//    /**
-//     * Get directoryId
-//     *
-//     * @return \AppBundle\Entity\Directory
-//     */
-//    public function getDirectoryId()
-//    {
-//        return $this->directory;
-//    }
-//
-//    /**
-//     * Add directory
-//     *
-//     * @param \AppBundle\Entity\Directory $directory
-//     *
-//     * @return Directory
-//     */
-//    public function addDirectory(\AppBundle\Entity\Directory $directory)
-//    {
-//        $this->directories[] = $directory;
-//        return $this;
-//    }
-//
-//    /**
-//     * Remove directory
-//     *
-//     * @param \AppBundle\Entity\Directory $directory
-//     */
-//    public function removeDirectory(\AppBundle\Entity\Directory $directory)
-//    {
-//        $this->directories->removeElement($directory);
-//    }
-//
-//    /**
-//     * Get directories
-//     *
-//     * @return \Doctrine\Common\Collections\Collection
-//     */
-//    public function getDirectories()
-//    {
-//        return $this->directories;
-//    }
+    /**
+     * Get directoryId
+     *
+     * @return \AppBundle\Entity\Directory
+     */
+    public function getDirectory()
+    {
+        return $this->directory;
+    }
+
+    /**
+     * Set directoryId
+     *
+     * @param \AppBundle\Entity\Directory $directory
+     *
+     * @return Directory
+     */
+    public function setDirectory(\AppBundle\Entity\Directory $directory = null)
+    {
+        $this->directory = $directory;
+        return $this;
+    }
+
+    /**
+     * Add directory
+     *
+     * @param \AppBundle\Entity\Directory $directory
+     *
+     * @return Directory
+     */
+    public function addDirectory(\AppBundle\Entity\Directory $directory)
+    {
+        $this->directories[] = $directory;
+        return $this;
+    }
+
+    /**
+     * Remove directory
+     *
+     * @param \AppBundle\Entity\Directory $directory
+     */
+    public function removeDirectory(\AppBundle\Entity\Directory $directory)
+    {
+        $this->directories->removeElement($directory);
+    }
+
+    /**
+     * Get directories
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getDirectories()
+    {
+        return $this->directories;
+    }
 
     public function createDir()
     {
@@ -257,15 +245,15 @@ class Directory implements ORMBehaviors\Tree\NodeInterface, \ArrayAccess
      */
     public function getUserName()
     {
-        return $this->user_name;
+        return $this->userName;
     }
 
     /**
-     * @param mixed $user_name
+     * @param mixed $userName
      */
-    public function setUserName($user_name)
+    public function setUserName($userName)
     {
-        $this->user_name = $user_name;
+        $this->userName = $userName;
     }
 
     /**
@@ -314,8 +302,20 @@ class Directory implements ORMBehaviors\Tree\NodeInterface, \ArrayAccess
         return $this;
     }
 
-    public function getSluggableFields()
+    /**
+     * @return mixed
+     */
+    public function getFiles()
     {
+        return $this->files;
+    }
+
+    /**
+     * @param mixed $files
+     */
+    public function setFiles($files)
+    {
+        $this->files = $files;
     }
 
 }

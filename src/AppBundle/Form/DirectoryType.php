@@ -14,7 +14,11 @@ class DirectoryType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('name')->add('isPrivate', CheckboxType::class, ['required' => false]);
+
+        $action_path = (!empty($options['action'])) ? "/myRepoFunctions/directorySubmit/{$options['action']}" : "/myRepoFunctions/directorySubmit";
+        $builder->add('name')
+            ->add('isPrivate', CheckboxType::class, ['required' => false])
+            ->setAction($action_path);
     }
 
     /**

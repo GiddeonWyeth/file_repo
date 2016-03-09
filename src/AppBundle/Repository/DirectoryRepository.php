@@ -12,5 +12,5 @@ use Knp\DoctrineBehaviors\ORM as ORMBehaviors;
  */
 class DirectoryRepository extends EntityRepository
 {
-    use ORMBehaviors\Tree\Tree;
+
 }

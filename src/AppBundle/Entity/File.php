@@ -2,10 +2,13 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use UserBundle\Entity\User;
 
 /**
- * @ORM\Entity(repositoryClass="AppBundle\Repository\Entity\FileRepository")
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\FileRepository")
  * @ORM\Table(name="file")
+ * @ORM\HasLifecycleCallbacks()
  */
 class File
 {
@@ -18,7 +21,7 @@ class File
     private $id;
 
     /**
-     * @ORM\Column(type="string")
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Directory", inversedBy="id")
      */
     private $directory;
 
@@ -26,6 +29,11 @@ class File
      * @ORM\Column(type="string")
      */
     private $name;
+
+    /**
+     * @ORM\Column(type="string")
+     */
+    private $encodedName;
 
     /**
      * @return mixed
@@ -75,5 +83,34 @@ class File
         $this->name = $name;
     }
 
+    public function uploadFile(UploadedFile $file, User $user, Directory $directory = null)
+    {
+        $directoryPath = $directory ? $directory->getPath() : null;
+        $file->move(self::getUploadRootDir('files/' . $user->getUsername() . $directoryPath), $this->getEncodedName() . '.' . $file->getClientOriginalExtension());
+    }
+
+    protected function getUploadRootDir($path)
+    {
+        // the absolute directory path where uploaded
+        // documents should be saved
+        return __DIR__ . '/../../../web/' . $path;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getEncodedName()
+    {
+        return $this->encodedName;
+    }
+
+    /**
+     * @ORM\PrePersist()
+     */
+    public function setEncodedName()
+    {
+        $this->encodedName = sha1(uniqid(mt_rand(), true));
+        return $this;
+    }
 
 }

@@ -1,9 +1,35 @@
 {% extends '@User/layout.html.twig' %}
 
 {% block fos_user_content %}
-    {{ form_start(form) }}
-    {{ form_row(form.name) }}
-    {{ form_row(form.isPrivate) }}
-    {{ form_end(form) }}
+    {% if current_directory is null %}
+        <h1>Root Directory</h1>
+    {% else %}
+        <h1>{{ current_directory.name }}</h1>
+    {% endif %}
+    <div style="float: left">
+        <h2>Add Directory</h2>
+        {{ form_start(directoryForm) }}
+        {{ form_row(directoryForm.name) }}
+        {{ form_row(directoryForm.isPrivate) }}
+        {{ form_end(directoryForm) }}
+        <ul>
+            {% for sub_directory in sub_directories %}
+                <li><a href="{{ path('dir_show') }}/{{ sub_directory.encodedName }}">{{ sub_directory.name }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div style="float: right">
+        <h2>Add Files</h2>
+        {{ form_start(filesForm) }}
+        {{ form_row(filesForm.files) }}
+        {{ form_end(filesForm) }}
+        <ul>
+            {% for sub_file in sub_files %}
+                <li>{{ sub_file.name }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
 
 {% endblock fos_user_content %}
+
