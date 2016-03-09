@@ -21,7 +21,7 @@ class File
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Directory", inversedBy="id")
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Directory", inversedBy="files")
      */
     private $directory;
 
