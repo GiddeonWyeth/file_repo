@@ -11,4 +11,20 @@ use Doctrine\ORM\EntityRepository;
  */
 class FileRepository extends EntityRepository
 {
+    /**
+     * @return array
+     */
+    public function getRootFiles()
+    {
+        $em = $this->getEntityManager();
+        $queryBuilder = $em->createQueryBuilder();
+        $queryBuilder->select('f')
+            ->from('AppBundle:File', 'f')
+            ->where('f.directory IS NULL');
+
+        $query = $queryBuilder->getQuery();
+        unset($queryBuilder);
+        return $query->getResult();
+    }
+
 }

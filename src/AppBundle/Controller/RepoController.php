@@ -11,7 +11,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
-use UserBundle\Entity\User;
 
 class RepoController extends Controller
 {
@@ -34,8 +33,8 @@ class RepoController extends Controller
         $user = $this->getUser();
 
         $current_dir = $dir_name ? $em->getRepository('AppBundle:Directory')->findOneBy(['encodedName' => $dir_name]) : null;
-        $sub_directories = $dir_name ? $current_dir->getDirectories()->toArray() : self::getRootDirectories($user, $em);
-        $sub_files = $dir_name ? $current_dir->getFiles()->toArray() : self::getRootFiles($em);
+        $sub_directories = $dir_name ? $current_dir->getDirectories()->toArray() : $em->getRepository('AppBundle:Directory')->getRootDirectories($user);
+        $sub_files = $dir_name ? $current_dir->getFiles()->toArray() : $em->getRepository('AppBundle:File')->getRootFiles();
 
         return $this->render('UserBundle:Profile:dir_show.html.twig', [
             'user' => $user,
@@ -45,37 +44,6 @@ class RepoController extends Controller
             'sub_files' => $sub_files,
             'current_directory' => $current_dir
         ]);
-    }
-    //TODO: Перенести кастомные запросы к бд в репозитории
-
-    /**
-     * @param User $user
-     * @param ObjectManager $em
-     * @return mixed
-     */
-    private static function getRootDirectories(User $user, ObjectManager $em)
-    {
-        $queryBuilder = $em->createQueryBuilder();
-        $queryBuilder->select('d')
-            ->from('AppBundle:Directory', 'd')
-            ->where('d.user = ?1 AND d.directory IS NULL')
-            ->setParameter(1, $user->getId());
-
-        $query = $queryBuilder->getQuery();
-        unset($queryBuilder);
-        return $query->getResult();
-    }
-
-    private static function getRootFiles(ObjectManager $em)
-    {
-        $queryBuilder = $em->createQueryBuilder();
-        $queryBuilder->select('f')
-            ->from('AppBundle:File', 'f')
-            ->where('f.directory IS NULL');
-
-        $query = $queryBuilder->getQuery();
-        unset($queryBuilder);
-        return $query->getResult();
     }
 
     /**
@@ -141,6 +109,9 @@ class RepoController extends Controller
 
     /**
      * @Route("/myRepoFunctions/filesSubmit/{parent_dir}", name="filesSubmit", defaults={"parent_dir" = null})
+     * @param $parent_dir
+     * @param Request $request
+     * @return bool|\Symfony\Component\HttpFoundation\RedirectResponse
      */
     public function filesSubmitAction($parent_dir, Request $request)
     {

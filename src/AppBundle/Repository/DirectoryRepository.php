@@ -3,6 +3,7 @@ namespace AppBundle\Repository;
 
 use Doctrine\ORM\EntityRepository;
 use Knp\DoctrineBehaviors\ORM as ORMBehaviors;
+use UserBundle\Entity\User;
 
 /**
  * DirectoryRepository
@@ -12,5 +13,22 @@ use Knp\DoctrineBehaviors\ORM as ORMBehaviors;
  */
 class DirectoryRepository extends EntityRepository
 {
+    /**
+     * @param User $user
+     * @return array
+     */
+    public function getRootDirectories(User $user)
+    {
+        $em = $this->getEntityManager();
+        $queryBuilder = $em->createQueryBuilder();
+        $queryBuilder->select('d')
+            ->from('AppBundle:Directory', 'd')
+            ->where('d.user = ?1 AND d.directory IS NULL')
+            ->setParameter(1, $user->getId());
+
+        $query = $queryBuilder->getQuery();
+        unset($queryBuilder);
+        return $query->getResult();
+    }
 
 }

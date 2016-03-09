@@ -216,16 +216,64 @@ class Directory /*implements ORMBehaviors\Tree\NodeInterface, \ArrayAccess*/
         return $this->directories;
     }
 
+    /**
+     * Get name
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Set name
+     *
+     * @param string $name
+     *
+     * @return Directory
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFiles()
+    {
+        return $this->files;
+    }
+
+    /**
+     * @param mixed $files
+     */
+    public function setFiles($files)
+    {
+        $this->files = $files;
+    }
+
+    /**
+     * @return bool
+     */
     public function createDir()
     {
         $path = $this->getUploadRootDir($this->getPath());
         if (!is_dir($path)) {
             mkdir($path);
+            return true;
         } else {
             echo 'This directory exists';
+            return false;
         }
     }
 
+    /**
+     * @param $path
+     * @return string
+     */
     protected function getUploadRootDir($path)
     {
         // the absolute directory path where uploaded
@@ -233,6 +281,10 @@ class Directory /*implements ORMBehaviors\Tree\NodeInterface, \ArrayAccess*/
         return __DIR__ . '/../../../web/' . $this->getUploadDir($path);
     }
 
+    /**
+     * @param null $path
+     * @return string
+     */
     protected function getUploadDir($path = null)
     {
         // get rid of the __DIR__ so it doesn't screw up
@@ -277,45 +329,6 @@ class Directory /*implements ORMBehaviors\Tree\NodeInterface, \ArrayAccess*/
     {
         $this->path = $path;
         return $this;
-    }
-
-    /**
-     * Get name
-     *
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * Set name
-     *
-     * @param string $name
-     *
-     * @return Directory
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getFiles()
-    {
-        return $this->files;
-    }
-
-    /**
-     * @param mixed $files
-     */
-    public function setFiles($files)
-    {
-        $this->files = $files;
     }
 
 }
