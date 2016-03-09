@@ -4,20 +4,26 @@ namespace AppBundle\Entity;
 use AppBundle\Repository\DirectoryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Knp\DoctrineBehaviors\Model as ORMBehaviors;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use UserBundle\Entity\User;
 
 /**
  * @ORM\Entity(repositoryClass="AppBundle\Repository\DirectoryRepository")
  * @ORM\Table(name="directory")
+ * @UniqueEntity("path")
  * @ORM\HasLifecycleCallbacks()
  */
-class Directory
+class Directory /*implements ORMBehaviors\Tree\NodeInterface, \ArrayAccess*/
 {
+
+    //use ORMBehaviors\Tree\Node;
+
 
     /**
      * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer")
+     * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
 
@@ -29,7 +35,7 @@ class Directory
     /**
      * @ORM\Column(type="string")
      */
-    private $encoded_name;
+    private $encodedName;
 
     /**
      * @ORM\ManyToOne(targetEntity="UserBundle\Entity\User", inversedBy="directories")
@@ -37,7 +43,7 @@ class Directory
     private $user;
 
 
-    private $user_name;
+    private $userName;
 
 
     /**
@@ -56,15 +62,22 @@ class Directory
      */
     private $directory;
 
+
     /**
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Directory", mappedBy="directory")
      */
     private $directories;
 
+    /**
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\File", mappedBy="directory")
+     */
+    private $files;
+
 
     public function __construct()
     {
         $this->directories = new ArrayCollection();
+        $this->files = new ArrayCollection();
     }
 
 
@@ -85,7 +98,7 @@ class Directory
      */
     public function getEncodedName()
     {
-        return $this->encoded_name;
+        return $this->encodedName;
     }
 
     /**
@@ -97,7 +110,7 @@ class Directory
      */
     public function setEncodedName()
     {
-        $this->encoded_name = sha1(uniqid(mt_rand(), true));
+        $this->encodedName = sha1(uniqid(mt_rand(), true));
         return $this;
     }
 
@@ -148,26 +161,26 @@ class Directory
     }
 
     /**
-     * Set directoryId
-     *
-     * @param \AppBundle\Entity\Directory $directoryId
-     *
-     * @return Directory
-     */
-    public function setDirectoryId(\AppBundle\Entity\Directory $directoryId = null)
-    {
-        $this->directory = $directoryId;
-        return $this;
-    }
-
-    /**
      * Get directoryId
      *
      * @return \AppBundle\Entity\Directory
      */
-    public function getDirectoryId()
+    public function getDirectory()
     {
         return $this->directory;
+    }
+
+    /**
+     * Set directoryId
+     *
+     * @param \AppBundle\Entity\Directory $directory
+     *
+     * @return Directory
+     */
+    public function setDirectory(\AppBundle\Entity\Directory $directory = null)
+    {
+        $this->directory = $directory;
+        return $this;
     }
 
     /**
@@ -205,9 +218,12 @@ class Directory
 
     public function createDir()
     {
-        //var_dump($this->getUploadRootDir($this->getPath()).$this->getName());
-        return mkdir($this->getUploadRootDir($this->getPath()) . $this->getName());
-
+        $path = $this->getUploadRootDir($this->getPath());
+        if (!is_dir($path)) {
+            mkdir($path);
+        } else {
+            echo 'This directory exists';
+        }
     }
 
     protected function getUploadRootDir($path)
@@ -221,7 +237,7 @@ class Directory
     {
         // get rid of the __DIR__ so it doesn't screw up
         // when displaying uploaded doc/image in the view.
-        return 'files/' . $this->getUserName() . '/' . $path;
+        return 'files/' . $this->getUserName() . $path;
     }
 
     /**
@@ -229,15 +245,15 @@ class Directory
      */
     public function getUserName()
     {
-        return $this->user_name;
+        return $this->userName;
     }
 
     /**
-     * @param mixed $user_name
+     * @param mixed $userName
      */
-    public function setUserName($user_name)
+    public function setUserName($userName)
     {
-        $this->user_name = $user_name;
+        $this->userName = $userName;
     }
 
     /**
@@ -284,6 +300,22 @@ class Directory
     {
         $this->name = $name;
         return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFiles()
+    {
+        return $this->files;
+    }
+
+    /**
+     * @param mixed $files
+     */
+    public function setFiles($files)
+    {
+        $this->files = $files;
     }
 
 }
